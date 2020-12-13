@@ -1,0 +1,5 @@
+.btn-group > .btn:first-child,
+.btn-group > .btn:last-child {
+  margin-left: 5px;
+  border-radius: 3px;
+}
