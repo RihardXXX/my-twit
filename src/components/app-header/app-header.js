@@ -18,13 +18,16 @@ const Header = styled.div`
         font-size: 1.2rem;
         color: grey;
     }
+    span {
+        color: red;
+    }
 `
 
-const AppHeader = () => {
+const AppHeader = ({liked, allPosts}) => {
     return(
         <Header>
             <h1>Rihard Alikhanov</h1>
-            <h2>3 записи, из них понравилось 0</h2>
+            <h2><span>{allPosts}</span> записи, из них понравилось <span>{liked}</span></h2>
         </Header>
     )
 }
