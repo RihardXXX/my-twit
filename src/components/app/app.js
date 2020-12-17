@@ -25,7 +25,8 @@ export default class App extends Component{
                 {label: "Learn JS", important: false, like: false, id: 2},
                 {label: "Learn Node JS", important: false, like: false, id: 3},  
             ],
-            term: ''
+            term: '',
+            filter: 'all'
         }
 
         this.deleteItem = this.deleteItem.bind(this) // биндим методы компонента
@@ -34,6 +35,8 @@ export default class App extends Component{
         this.onToggleLiked = this.onToggleLiked.bind(this)
         this.searchPost = this.searchPost.bind(this)
         this.onUpdateSearch = this.onUpdateSearch.bind(this)
+        this.filterPost = this.filterPost.bind(this)
+        this.onFilterSelect = this.onFilterSelect.bind(this)
 
         this.maxId = 4
     }
@@ -48,7 +51,12 @@ export default class App extends Component{
     }
 
     addItem(body){ // добавление элемента
-        let htmlId = nextId();
+        if(!body){ //
+            return
+        }
+
+        let htmlId = nextId();//
+
         const newItem = {
             label: body,
             important: false,
@@ -62,34 +70,29 @@ export default class App extends Component{
         })
     }
 
+    onSwitchImportantLiked(data, select, id){
+        const index = data.findIndex(elem => elem.id === id) // индекс лайкнутого поста
+        const oldPost = data[index] // берём старый объект
+        // тут нужно свойство добавить в новый объект
+        let newPost;
+        if(select === 'important'){
+            newPost = {...oldPost, important: !oldPost.important}
+            console.log(1)
+        }else {
+            newPost = {...oldPost, like: !oldPost.like}
+        }
+        const newArr = [...data.slice(0, index), newPost, ...data.slice(index + 1)] // новый массив с новым объектом
+        return {
+            data: newArr
+        }
+    }
+
     onToggleImportant(id){ // отмечены важные посты
-        this.setState(({data}) => {
-            const index = data.findIndex(elem => elem.id === id) // индекс лайкнутого поста
-
-            const oldPost = data[index] // берём старый объект
-            const newPost = {...oldPost, important: !oldPost.important} // копируем стар объект меняя его статус лайка
-
-            const newArr = [...data.slice(0, index), newPost, ...data.slice(index + 1)] // новый массив с новым объектом
-
-            return {
-                data: newArr
-            }
-        })
+        this.setState(({data}) => this.onSwitchImportantLiked(data, 'important', id))
     }
 
     onToggleLiked(id){ // лайкнутый пост
-        this.setState(({data}) => {
-            const index = data.findIndex(elem => elem.id === id) // индекс лайкнутого поста
-
-            const oldPost = data[index] // берём старый объект
-            const newPost = {...oldPost, like: !oldPost.like} // копируем стар объект меняя его статус лайка
-
-            const newArr = [...data.slice(0, index), newPost, ...data.slice(index + 1)] // новый массив с новым объектом
-
-            return {
-                data: newArr
-            }
-        })
+        this.setState(({data}) => this.onSwitchImportantLiked(data, 'like', id))
     }
 
     searchPost(items, term){ // функция по поиску поста
@@ -104,12 +107,25 @@ export default class App extends Component{
         this.setState({term})
     }
 
+    filterPost(items, filter){
+        if(filter === 'like'){
+            return items.filter(item => item.like)
+        }else{
+            return items
+        }
+    }
+
+    onFilterSelect(filter){
+        this.setState({filter})
+    }
+
     render(){
-        const {data, term} = this.state
+        const {data, term, filter} = this.state
         const liked = data.filter(post => post.like).length // количество лайкнутых постов
         const allPosts = data.length // общее количество постов
 
-        const visiblePosts = this.searchPost(data, term) // посты фильрируемые по поиску
+        const visiblePosts = 
+            this.filterPost(this.searchPost(data, term), filter) // посты фильрируемые по поиску и по кнопке
 
         return(
             <AppBlock>
@@ -119,7 +135,9 @@ export default class App extends Component{
                 <div className="search-panel d-flex">
                     <SearchPanel
                     onUpdateSearch={this.onUpdateSearch} />
-                    <PostStatusFilter />
+                    <PostStatusFilter 
+                    filter={filter}
+                    onFilterSelect={this.onFilterSelect} />
                 </div>
                 <PostList 
                 posts={visiblePosts}
